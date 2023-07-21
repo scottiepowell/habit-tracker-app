@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirm 2FA</title>
+</head>
+<body>
+    <h1>Confirm 2FA</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div>
+            {{ form.totp_token.label }}
+            {{ form.totp_token() }}
+        </div>
+
+        <div>
+            {{ form.submit() }}
+        </div>
+    </form>
+</body>
+</html>

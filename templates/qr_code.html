@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Confirm 2FA Setup</h1>
+    <p>Scan the QR code below with your authenticator app and enter the generated code to complete setup.</p>
+    <img src="{{ qr_code_path }}" alt="QR Code">
+    
+    <form action="{{ url_for('confirm_2fa') }}" method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            <label for="totp_token">2FA Token:</label>
+            {{ form.totp_token(id="totp_token") }}
+        </div>
+        <div>
+            <input type="submit" value="Confirm">
+        </div>
+    </form>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+{% endblock %}

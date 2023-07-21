@@ -1,0 +1,30 @@
+User Model:
+user_id (Primary Key)
+name
+email
+password (hashed)
+
+Habit Model:
+habit_id (Primary Key)
+user_id (Foreign Key to User)
+name
+duration
+location
+time
+type (Positive or Negative)
+note
+
+DailyEntry Model:
+entry_id (Primary Key)
+habit_id (Foreign Key to Habit)
+date (timestamp)
+progress
+
+MonthlySummary Model:
+summary_id (Primary Key)
+user_id (Foreign Key to User)
+habit_id (Foreign Key to Habit)
+month
+year
+total_duration
+total_entries
