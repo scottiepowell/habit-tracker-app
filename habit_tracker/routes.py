@@ -1,7 +1,7 @@
 from flask_login import login_user, login_required, logout_user, current_user
 from flask import Flask, render_template, request, url_for, redirect, flash
-from app import app, db
-from models import User, Login, FailedLogin
+from . import app, db
+from .models import User, Login, FailedLogin, CreateAdminForm
 from datetime import datetime, timedelta
 
 @app.route('/')
@@ -22,6 +22,9 @@ def admin_view():
         flash('You do not have permission to access this page', 'error')
         return redirect(url_for('index'))
 
+    user = User.query.filter_by(username='demo01').first()
+    print(user)
+
     # Get the current time
     now = datetime.utcnow()
 
@@ -37,7 +40,14 @@ def admin_view():
     recent_failed_logins = FailedLogin.query.filter(FailedLogin.timestamp >= two_days_ago).all()
     failed_login_info = [(login.user_id, User.query.get(login.user_id).username) for login in recent_failed_logins]
 
-    return render_template('admin.html', num_accounts=num_accounts, recent_logins=recent_logins, failed_login_info=failed_login_info)
+    # Get users' information including email, totp status, and last login time
+    users_info = db.session.query(User.id, User.email, User.totp_secret, db.func.max(Login.timestamp)) \
+        .join(Login, User.id == Login.user_id) \
+        .group_by(User.id).all()
+    print(users_info)  # should print out all the user information
+    users_info = [(info[0], info[1], bool(info[2]), info[3]) for info in users_info]
+
+    return render_template('admin.html', num_accounts=num_accounts, recent_logins=recent_logins, failed_login_info=failed_login_info, users_info=users_info)
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
@@ -54,3 +64,32 @@ def delete_user(user_id):
     db.session.commit()
     flash('User deleted successfully', 'success')
     return redirect(url_for('admin_view'))
+
+@app.route('/create_admin', methods=['GET', 'POST'])
+def create_admin():
+    # only allow admins to access this page
+    if current_user.role != 'admin':
+        flash('You do not have permission to access this page', 'error')
+        return redirect(url_for('index'))
+
+    form = CreateAdminForm()
+    if form.validate_on_submit():
+        # check if the admin already exists
+        admin = User.query.filter_by(username=form.username.data).first()
+        if admin is not None:
+            flash('Admin user already exists!', 'error')
+            return redirect(url_for('create_admin'))
+
+        # Create new User object
+        admin = User(username=form.username.data, email=form.email.data, role='admin')
+        admin.set_password(form.password.data)
+
+        # Add new User to the database
+        db.session.add(admin)
+        db.session.commit()
+
+        flash('Admin user created!', 'success')
+        return redirect(url_for('admin_view'))
+
+    return render_template('create_admin.html', form=form)
+

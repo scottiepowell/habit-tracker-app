@@ -2,8 +2,8 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.facebook import make_facebook_blueprint, facebook
 from flask import redirect, url_for, jsonify, flash, render_template, request, session
-from models import User, LoginForm, RegistrationForm,TwoFactorForm
-from app import app, db
+from .models import User, LoginForm, RegistrationForm,TwoFactorForm
+from . import app, db
 import pyotp, qrcode
 import os
 
@@ -74,6 +74,12 @@ def login():
                 session['user_id_temp'] = user.id
                 print(f"Session data after setting user_id_temp in login: {session}")
                 return redirect(url_for('setup_2fa'))
+
+            # check user role and redirect accordingly
+            if user.role == 'admin':
+                return redirect(url_for('admin_view'))
+            else:
+                return redirect(url_for('dashboard'))
     return render_template('login.html', title='Sign In', form=form)
 
 def after_user_registration(user):
@@ -109,7 +115,10 @@ def confirm_2fa():
         if totp.verify(form.totp_token.data):
             login_user(user)
             flash('Logged in successfully', 'success')
-            return redirect(url_for('dashboard'))  # change to your landing page
+            if user.role == 'admin':
+                return redirect(url_for('admin_view'))
+            else:
+                return redirect(url_for('dashboard'))
         else:
             flash('Invalid 2FA code', 'error')
             return redirect(url_for('confirm_2fa'))

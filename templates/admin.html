@@ -1,10 +1,10 @@
-<!--admin.html-->
-
 {% extends "base.html" %}
 
 {% block content %}
 
     <h1>Admin Dashboard</h1>
+
+    <a href="{{ url_for('create_admin') }}">Create new admin</a>
 
     <p>Number of accounts: {{ num_accounts }}</p>
     <p>Number of logins in the last 72 hours: {{ recent_logins }}</p>
@@ -16,4 +16,23 @@
         {% endfor %}
     </ul>
 
+    <h2>User Information</h2>
+    <table>
+        <tr>
+            <th>User ID</th>
+            <th>Email</th>
+            <th>TOTP Enabled</th>
+            <th>Last Login</th>
+        </tr>
+        {% for user_id, email, totp_enabled, last_login in users_info %}
+            <tr>
+                <td>{{ user_id }}</td>
+                <td>{{ email }}</td>
+                <td>{{ totp_enabled }}</td>
+                <td>{{ last_login }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
 {% endblock %}
+
