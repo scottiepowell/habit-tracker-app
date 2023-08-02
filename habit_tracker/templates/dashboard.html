@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Welcome to your dashboard</h1>
+    <a href="{{ url_for('logout') }}">Logout</a>
+
+    <!-- Positive Habits Dropdown -->
+    <select name="positive_habits">
+        <option value="" disabled selected>Select Positive Habit</option>
+        {% for habit in positive_habits %}
+            <option value="{{ habit.id }}">{{ habit.name }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- Negative Habits Dropdown -->
+    <select name="negative_habits">
+        <option value="" disabled selected>Select Negative Habit</option>
+        {% for habit in negative_habits %}
+            <option value="{{ habit.id }}">{{ habit.name }}</option>
+        {% endfor %}
+    </select>
+
+</body>
+</html>
+
+{% endblock %}
+

@@ -1,18 +1,22 @@
 from flask_login import login_user, login_required, logout_user, current_user
 from flask import Flask, render_template, request, url_for, redirect, flash
 from . import app, db
-from .models import User, Login, FailedLogin, CreateAdminForm
+from .models import User, Login, FailedLogin, CreateAdminForm, Habit
 from datetime import datetime, timedelta
 
 @app.route('/')
 def home():
     return render_template('index.html')
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
-    # Implement the logic for the user's dashboard
-    return render_template('dashboard.html')
+    # Query the habit data
+    positive_habits = Habit.query.filter_by(habit_type='Positive').all()
+    negative_habits = Habit.query.filter_by(habit_type='Negative').all()
+
+    return render_template('dashboard.html', positive_habits=positive_habits, negative_habits=negative_habits)
+
 
 from datetime import datetime, timedelta
 

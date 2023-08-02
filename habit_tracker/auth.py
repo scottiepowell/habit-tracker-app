@@ -52,11 +52,18 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    print("Starting login process")  # Add a print statement at the start of the function
     form = LoginForm()
 
+    print(f"Form validated: {form.validate()}")  # Check if the form data is valid
+    print(f"Form errors: {form.errors}")  # Print out any form errors
+
     if form.validate_on_submit():
+        print(f"Username: {form.username.data}")  # Print the entered username
         # get user from database
         user = User.query.filter_by(username=form.username.data).first()
+        print(f"User retrieved: {user is not None}")  # Check if the user was found
+
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
@@ -80,7 +87,10 @@ def login():
                 return redirect(url_for('admin_view'))
             else:
                 return redirect(url_for('dashboard'))
+
+    print("Rendering login form")  # Add a print statement before rendering the form
     return render_template('login.html', title='Sign In', form=form)
+
 
 def after_user_registration(user):
     user.totp_secret = pyotp.random_base32()
